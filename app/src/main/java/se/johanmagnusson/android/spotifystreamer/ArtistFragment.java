@@ -1,10 +1,11 @@
 package se.johanmagnusson.android.spotifystreamer;
 
 import android.content.Intent;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -20,6 +21,14 @@ public class ArtistFragment extends Fragment {
     private ArrayAdapter<String> artistAdapter;
 
     public ArtistFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //enable menu from this fragment
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -53,9 +62,6 @@ public class ArtistFragment extends Fragment {
 
                 String artist = artistAdapter.getItem(position);
 
-                //todo: remove before release
-                Log.d(LOG_TAG, "Artist item " + String.valueOf(position) + "clicked.");
-
                 //todo add .putExtra() with artist data to intent
                 Intent topTracksIntent = new Intent(getActivity(), TopTracksActivity.class);
                 startActivity(topTracksIntent);
@@ -63,5 +69,14 @@ public class ArtistFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        //add menu items for this fragment
+        //inflater.inflate(R.menu.menu_artists, menu);
+
     }
 }

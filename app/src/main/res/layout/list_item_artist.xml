@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/list_item_artist_name"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:minHeight="?android:attr/listPreferredItemHeight"
-    android:gravity="center_vertical">
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:padding="6dip">
 
-</TextView >
+    <ImageView
+        android:id="@+id/list_item_artist_icon"
+        android:layout_width="45dip"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="6dip"
+        android:background="@color/material_blue_grey_800"/>
+
+    <TextView
+        android:id="@+id/list_item_artist_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/list_item_artist_icon"
+        android:textSize="16sp"
+        tools:text="Artist Name"/>
+</RelativeLayout >
