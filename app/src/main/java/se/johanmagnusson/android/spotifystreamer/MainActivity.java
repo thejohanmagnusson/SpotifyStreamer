@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -28,7 +27,6 @@ public class MainActivity extends ActionBarActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        Log.d(LOG_TAG, "OnNewIntent");
         handleIntent(intent);
     }
 
@@ -63,12 +61,15 @@ public class MainActivity extends ActionBarActivity {
     private void handleIntent(Intent intent){
 
         if(Intent.ACTION_SEARCH.equals(intent.getAction())){
-            Log.d(LOG_TAG, "Intent: Search");
-        }
-        else{
-            Log.d(LOG_TAG, "Intent: NOT EXPECTED INTENT");
-        }
 
+            //send intent quarry to artist fragment for API call
+            ArtistFragment artistFragment = (ArtistFragment) getSupportFragmentManager().findFragmentById(R.id.container_fragment);
+
+            if(artistFragment != null){
+                String query = intent.getStringExtra(SearchManager.QUERY);
+                artistFragment.searchArtist(query);
+            }
+        }
 
     }
 }
