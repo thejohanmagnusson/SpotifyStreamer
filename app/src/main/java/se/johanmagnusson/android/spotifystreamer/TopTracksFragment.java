@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,7 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
+import se.johanmagnusson.android.spotifystreamer.Common.Parameter;
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
 
 
@@ -38,12 +41,14 @@ public class TopTracksFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
         Intent intent = getActivity().getIntent();
 
-        if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-            String artistId = intent.getStringExtra(Intent.EXTRA_TEXT);
+        if (intent != null && intent.hasExtra(Parameter.ARTIST_ID)) {
+            String artistId = intent.getStringExtra(Parameter.ARTIST_ID);
 
             if (artistId != null)
                 getTopTracks(artistId);
         }
+
+        setActionBarSubtitle(intent.getStringExtra(Parameter.ARTIST_NAME));
 
         List<TrackItem> topTracks = new ArrayList<TrackItem>();
 
@@ -63,6 +68,11 @@ public class TopTracksFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    private void setActionBarSubtitle(String subTitle){
+        ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
+        actionBar.setSubtitle(subTitle);
     }
 
     public void getTopTracks(String artistId) {

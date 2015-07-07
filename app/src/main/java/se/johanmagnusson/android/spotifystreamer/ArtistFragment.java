@@ -19,6 +19,7 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
+import se.johanmagnusson.android.spotifystreamer.Common.Parameter;
 import se.johanmagnusson.android.spotifystreamer.Models.ArtistItem;
 
 
@@ -57,7 +58,8 @@ public class ArtistFragment extends Fragment {
                 ArtistItem artist = artistAdapter.getItem(position);
 
                 Intent topTracksIntent = new Intent(getActivity(), TopTracksActivity.class);
-                topTracksIntent.putExtra(Intent.EXTRA_TEXT, artist.id);
+                topTracksIntent.putExtra(Parameter.ARTIST_ID, artist.id);
+                topTracksIntent.putExtra(Parameter.ARTIST_NAME, artist.name);
                 startActivity(topTracksIntent);
             }
         });
@@ -67,7 +69,7 @@ public class ArtistFragment extends Fragment {
 
     public void searchArtist(String artist){
 
-        new SearchArtistTask().execute(artist);
+        new SearchArtistTask().execute(artist.trim());
     }
 
     public class SearchArtistTask extends AsyncTask<String, Void, List<ArtistItem>>{
