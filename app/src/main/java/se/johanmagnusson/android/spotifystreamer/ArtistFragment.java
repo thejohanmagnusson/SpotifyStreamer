@@ -106,7 +106,6 @@ public class ArtistFragment extends Fragment {
                 artistAdapter.addAll(result);
             else
                 Toast.makeText(getActivity(), "No artist found.", Toast.LENGTH_SHORT).show();
-
         }
     }
 }

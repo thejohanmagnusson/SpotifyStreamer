@@ -1,0 +1,25 @@
+<resources>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_country_label">Country</string>
+    <string name="pref_country_key">country</string>
+    <string name="pref_country_default">SE</string>
+    <string-array name="pref_country_list_options">
+        <item>Sweden</item>
+        <item>Denmark</item>
+        <item>Norway</item>
+        <item>Finnland</item>
+    </string-array>
+    <string-array name="pref_country_list_values">
+        <item>SE</item>
+        <item>DK</item>
+        <item>NO</item>
+        <item>FI</item>
+    </string-array>
+
+</resources>

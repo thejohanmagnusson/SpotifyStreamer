@@ -1,8 +1,10 @@
 package se.johanmagnusson.android.spotifystreamer;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -94,8 +96,11 @@ public class TopTracksFragment extends Fragment {
             SpotifyApi spotifyApi = new SpotifyApi();
             SpotifyService spotify = spotifyApi.getService();
 
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String countryCode = prefs.getString(getString(R.string.pref_country_key), getString(R.string.pref_country_default));
+
             final Map<String, Object> options = new HashMap<String, Object>();
-            options.put(COUNTRY, "SE");
+            options.put(COUNTRY, countryCode);
 
             Tracks result = spotify.getArtistTopTrack(parameter[0], options);
 
@@ -109,7 +114,6 @@ public class TopTracksFragment extends Fragment {
                         track.album.images.size() > 0 ? track.album.images.get(track.album.images.size() - 1).url : null,
                         track.album.images.size() > 0 ? track.album.images.get(0).url : null,
                         track.preview_url));
-
             }
 
             return tracks;
