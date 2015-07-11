@@ -32,9 +32,9 @@ public class ArtistAdapter extends ArrayAdapter<ArtistItem> {
 
             Picasso.with(getContext())
                     .load(artist.imageUrl)
-                    .error(R.drawable.default_list_icon)    //use if image is missing
-                    //.resizeDimen
-                    //.centerInside()
+                    .error(R.drawable.default_list_icon)    //use default image on error
+                    .fit()
+                    .centerCrop()
                     .into(artistIcon);
 
         TextView artistName = (TextView) rootView.findViewById(R.id.artist_item_name);

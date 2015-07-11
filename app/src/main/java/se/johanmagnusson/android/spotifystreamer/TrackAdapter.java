@@ -32,9 +32,9 @@ public class TrackAdapter extends ArrayAdapter<TrackItem> {
 
         Picasso.with(getContext())
                 .load(track.imageUrlSmall)
-                .error(R.drawable.default_list_icon)    //use if image is missing
-                        //.resizeDimen
-                        //.centerInside()
+                .error(R.drawable.default_list_icon)    //use default image on error
+                .fit()
+                .centerCrop()
                 .into(trackImage);
 
         TextView trackName = (TextView) rootView.findViewById(R.id.track_item_name);

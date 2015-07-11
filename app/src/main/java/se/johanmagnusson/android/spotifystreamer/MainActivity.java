@@ -19,15 +19,22 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
-        handleIntent(getIntent());
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        handleIntent(intent);
+        if(Intent.ACTION_SEARCH.equals(intent.getAction())){
+
+            //make search query in fragment
+            ArtistFragment artistFragment = (ArtistFragment) getSupportFragmentManager().findFragmentById(R.id.container_fragment);
+
+            if(artistFragment != null){
+                String query = intent.getStringExtra(SearchManager.QUERY);
+                artistFragment.searchArtist(query);
+            }
+        }
     }
 
     @Override
@@ -55,19 +62,5 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void handleIntent(Intent intent){
-
-        if(Intent.ACTION_SEARCH.equals(intent.getAction())){
-
-            //send intent quarry to artist fragment for API call
-            ArtistFragment artistFragment = (ArtistFragment) getSupportFragmentManager().findFragmentById(R.id.container_fragment);
-
-            if(artistFragment != null){
-                String query = intent.getStringExtra(SearchManager.QUERY);
-                artistFragment.searchArtist(query);
-            }
-        }
     }
 }

@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,9 +24,11 @@ import java.util.List;
 import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyError;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
+import retrofit.RetrofitError;
 import se.johanmagnusson.android.spotifystreamer.Common.Parameter;
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
 
@@ -32,9 +36,25 @@ import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
 public class TopTracksFragment extends Fragment {
 
     private final String LOG_TAG = TopTracksFragment.class.getSimpleName();
+    private final String TRACKS_KEY = "tracks";
+
+    private List<TrackItem> topTracks;
     private ArrayAdapter<TrackItem> trackAdapter;
 
     public TopTracksFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //check and restore data if available
+        if(savedInstanceState == null || !savedInstanceState.containsKey(TRACKS_KEY))
+            topTracks = new ArrayList<TrackItem>();
+        else
+            topTracks = savedInstanceState.getParcelableArrayList(TRACKS_KEY);
+
+        trackAdapter = new TrackAdapter(getActivity(), topTracks);
     }
 
     @Override
@@ -43,16 +63,14 @@ public class TopTracksFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
         Intent intent = getActivity().getIntent();
 
-        if (intent != null && intent.hasExtra(Parameter.ARTIST_ID)) {
-            String artistId = intent.getStringExtra(Parameter.ARTIST_ID);
-
-            if (artistId != null)
-                getTopTracks(artistId);
+        if (intent != null) {
+            if (intent.hasExtra(Parameter.ARTIST_ID)) {
+                getTopTracks(intent.getStringExtra(Parameter.ARTIST_ID));
+            }
+            if(intent.hasExtra(Parameter.ARTIST_NAME)) {
+                setActionBarSubtitle(intent.getStringExtra(Parameter.ARTIST_NAME));
+            }
         }
-
-        setActionBarSubtitle(intent.getStringExtra(Parameter.ARTIST_NAME));
-
-        List<TrackItem> topTracks = new ArrayList<TrackItem>();
 
         trackAdapter = new TrackAdapter(getActivity(), topTracks);
 
@@ -72,18 +90,29 @@ public class TopTracksFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        outState.putParcelableArrayList(TRACKS_KEY, (ArrayList<? extends Parcelable>) topTracks);
+
+        super.onSaveInstanceState(outState);
+    }
+
     private void setActionBarSubtitle(String subTitle){
         ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
-        actionBar.setSubtitle(subTitle);
+
+        if(actionBar != null)
+            actionBar.setSubtitle(subTitle);
     }
 
     public void getTopTracks(String artistId) {
         new GetTopTracksTask().execute(artistId);
     }
 
+
     public class GetTopTracksTask extends AsyncTask<String, Void, List<TrackItem>> {
 
-        public static final String COUNTRY = "country";
+        private static final String COUNTRY = "country";
 
         private final String LOG_TAG = GetTopTracksTask.class.getSimpleName();
 
@@ -102,18 +131,26 @@ public class TopTracksFragment extends Fragment {
             final Map<String, Object> options = new HashMap<String, Object>();
             options.put(COUNTRY, countryCode);
 
-            Tracks result = spotify.getArtistTopTrack(parameter[0], options);
-
             List<TrackItem> tracks = new ArrayList<TrackItem>();
 
-            for (Track track : result.tracks) {
+            try {
+                Tracks result = spotify.getArtistTopTrack(parameter[0], options);
 
-                tracks.add(new TrackItem(
-                        track.name,
-                        track.album.name,
-                        track.album.images.size() > 0 ? track.album.images.get(track.album.images.size() - 1).url : null,
-                        track.album.images.size() > 0 ? track.album.images.get(0).url : null,
-                        track.preview_url));
+                for (Track track : result.tracks) {
+
+                    tracks.add(new TrackItem(
+                            track.name,
+                            track.album.name,
+                            track.album.images.size() > 1 ? track.album.images.get(track.album.images.size() - 2).url : null,
+                            track.album.images.size() > 0 ? track.album.images.get(0).url : null,
+                            track.preview_url));
+                }
+            }
+            catch (RetrofitError error){
+                SpotifyError spotifyError = SpotifyError.fromRetrofitError(error);
+
+                if(spotifyError.hasErrorDetails())
+                    Log.e(LOG_TAG, spotifyError.toString());
             }
 
             return tracks;

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/artist_item_container"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight">
 
     <ImageView
         android:id="@+id/artist_item_image"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="?android:attr/listPreferredItemHeight"
+        android:layout_height="?android:attr/listPreferredItemHeight"
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:layout_margin="6dp"/>
