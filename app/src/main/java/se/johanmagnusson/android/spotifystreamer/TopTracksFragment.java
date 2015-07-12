@@ -64,7 +64,7 @@ public class TopTracksFragment extends Fragment {
         Intent intent = getActivity().getIntent();
 
         if (intent != null) {
-            if (intent.hasExtra(Parameter.ARTIST_ID)) {
+            if(savedInstanceState == null){
                 getTopTracks(intent.getStringExtra(Parameter.ARTIST_ID));
             }
             if(intent.hasExtra(Parameter.ARTIST_NAME)) {
@@ -153,7 +153,7 @@ public class TopTracksFragment extends Fragment {
                     Log.e(LOG_TAG, spotifyError.toString());
             }
 
-            return tracks;
+          return tracks;
         }
 
         @Override

@@ -27,19 +27,36 @@ public class ArtistAdapter extends ArrayAdapter<ArtistItem> {
 
         ArtistItem artist = (ArtistItem) getItem(position);
 
-        View rootView = LayoutInflater.from(getContext()).inflate(R.layout.artist_item, parent, false);
-        ImageView artistIcon = (ImageView) rootView.findViewById(R.id.artist_item_image);
+        View rootView = convertView;
 
-            Picasso.with(getContext())
-                    .load(artist.imageUrl)
-                    .error(R.drawable.default_list_icon)    //use default image on error
-                    .fit()
-                    .centerCrop()
-                    .into(artistIcon);
+        //check if reuse of view
+        if(rootView == null){
+            rootView = LayoutInflater.from(getContext()).inflate(R.layout.artist_item, parent, false);
 
-        TextView artistName = (TextView) rootView.findViewById(R.id.artist_item_name);
-        artistName.setText(artist.name);
+            ViewHolder viewHolder = new ViewHolder();
+            viewHolder.artistIcon = (ImageView) rootView.findViewById(R.id.artist_item_image);
+            viewHolder.artistName = (TextView) rootView.findViewById(R.id.artist_item_name);
+            rootView.setTag(viewHolder);
+        }
+
+        //load data
+        ViewHolder viewHolder  = (ViewHolder) rootView.getTag();
+
+        Picasso.with(getContext())
+                .load(artist.imageUrl)
+                .error(R.drawable.default_list_icon)    //use default image on error
+                .fit()
+                .centerCrop()
+                .into(viewHolder.artistIcon);
+
+        viewHolder.artistName.setText(artist.name);
 
         return rootView;
+    }
+
+
+    private static class ViewHolder{
+        public ImageView artistIcon;
+        public TextView artistName;
     }
 }

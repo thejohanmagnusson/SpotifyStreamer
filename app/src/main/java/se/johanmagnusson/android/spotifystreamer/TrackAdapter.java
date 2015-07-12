@@ -27,22 +27,38 @@ public class TrackAdapter extends ArrayAdapter<TrackItem> {
 
         TrackItem track = (TrackItem) getItem(position);
 
-        View rootView = LayoutInflater.from(getContext()).inflate(R.layout.track_item, parent, false);
-        ImageView trackImage = (ImageView) rootView.findViewById(R.id.track_item_image);
+        View rootView = convertView;
+
+        //check if reuse of view
+        if(rootView == null){
+            rootView = LayoutInflater.from(getContext()).inflate(R.layout.track_item, parent, false);
+
+            ViewHolder viewHolder = new ViewHolder();
+            viewHolder.trackImage = (ImageView) rootView.findViewById(R.id.track_item_image);
+            viewHolder.trackName = (TextView) rootView.findViewById(R.id.track_item_name);
+            viewHolder.albumName = (TextView) rootView.findViewById(R.id.track_item_album);
+            rootView.setTag(viewHolder);
+        }
+
+        //load data
+        ViewHolder viewHolder = (ViewHolder) rootView.getTag();
 
         Picasso.with(getContext())
                 .load(track.imageUrlSmall)
                 .error(R.drawable.default_list_icon)    //use default image on error
                 .fit()
                 .centerCrop()
-                .into(trackImage);
+                .into(viewHolder.trackImage);
 
-        TextView trackName = (TextView) rootView.findViewById(R.id.track_item_name);
-        trackName.setText(track.name);
-
-        TextView albumName = (TextView) rootView.findViewById(R.id.track_item_album);
-        albumName.setText(track.album);
+        viewHolder.trackName.setText(track.name);
+        viewHolder.albumName.setText(track.album);
 
         return rootView;
+    }
+
+    private static class ViewHolder{
+        public ImageView trackImage;
+        public TextView trackName;
+        public TextView albumName;
     }
 }
