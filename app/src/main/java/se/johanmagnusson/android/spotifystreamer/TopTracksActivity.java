@@ -1,18 +1,25 @@
 package se.johanmagnusson.android.spotifystreamer;
 
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
 
-public class TopTracksActivity extends ActionBarActivity {
+
+public class TopTracksActivity extends AppCompatActivity implements TopTracksFragment.Callback{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_top_tracks);
+
+        //add fragment
+        if(savedInstanceState == null)
+            getSupportFragmentManager().beginTransaction().add(R.id.track_container, new TopTracksFragment()).commit();
     }
 
 
@@ -35,5 +42,13 @@ public class TopTracksActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onTrackSelected(TrackItem track) {
+        //no need to check device size since this activity will only exist on devices defined as not large.
+        Intent intent = new Intent(this, PlayerActivity.class);
+        intent.putExtra(PlayerDialogFragment.TRACK_KEY, track);
+        startActivity(intent);
     }
 }

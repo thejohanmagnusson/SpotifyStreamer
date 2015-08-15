@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:padding="@dimen/abc_dialog_padding_material">
+
+    <TextView
+        android:id="@+id/player_artist_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Coldplay"/>
+
+    <TextView
+        android:id="@+id/player_album_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ghost Stories" />
+
+    <ImageView
+        android:id="@+id/player_album_artwork"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/default_list_icon"/>
+
+    <TextView
+        android:id="@+id/player_track_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="A Sky Full of Stars"/>
+
+    <SeekBar
+        android:id="@+id/player_duration_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/player_duration_played"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="00:00"/>
+
+        <TextView
+            android:id="@+id/player_duration_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:30"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+
+        <ImageButton
+            android:id="@+id/player_action_previous"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_previous"/>
+
+        <ImageButton
+            android:id="@+id/player_action_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_play"/>
+
+        <ImageButton
+            android:id="@+id/player_action_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_next"/>
+    </LinearLayout>
+
+</LinearLayout>

@@ -8,7 +8,7 @@ import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +29,7 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.RetrofitError;
-import se.johanmagnusson.android.spotifystreamer.Common.Parameter;
+import se.johanmagnusson.android.spotifystreamer.Models.ArtistItem;
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
 
 
@@ -37,9 +37,15 @@ public class TopTracksFragment extends Fragment {
 
     private final String LOG_TAG = TopTracksFragment.class.getSimpleName();
     private final String TRACKS_KEY = "tracks";
+    static String ARTIST_KEY = "artist";
 
     private List<TrackItem> topTracks;
     private ArrayAdapter<TrackItem> trackAdapter;
+
+    //callback interface to communicate with activities
+    public interface Callback {
+        public void onTrackSelected(TrackItem track);
+    }
 
     public TopTracksFragment() {
     }
@@ -48,6 +54,7 @@ public class TopTracksFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //todo: fix so tracks are retained after return from player
         //check and restore data if available
         if(savedInstanceState == null || !savedInstanceState.containsKey(TRACKS_KEY))
             topTracks = new ArrayList<TrackItem>();
@@ -60,17 +67,27 @@ public class TopTracksFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
-        Intent intent = getActivity().getIntent();
+        //todo: args/intent handling not good. Try remove intent and just use args.
+        Bundle args = getArguments();
 
-        if (intent != null) {
-            if(savedInstanceState == null){
-                getTopTracks(intent.getStringExtra(Parameter.ARTIST_ID));
-            }
-            if(intent.hasExtra(Parameter.ARTIST_NAME)) {
-                setActionBarSubtitle(intent.getStringExtra(Parameter.ARTIST_NAME));
+        if(args != null) {
+            updateArtist((ArtistItem) args.getParcelable(ARTIST_KEY));
+        }
+        else {
+            Intent intent = getActivity().getIntent();
+
+            if (intent != null) {
+                if(savedInstanceState == null) {
+                    ArtistItem artist = intent.getParcelableExtra(ARTIST_KEY);
+                    if(artist != null)
+                        updateArtist(artist);
+                }
+
             }
         }
+
+
+        View rootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
 
         trackAdapter = new TrackAdapter(getActivity(), topTracks);
 
@@ -83,7 +100,8 @@ public class TopTracksFragment extends Fragment {
 
                 TrackItem track = trackAdapter.getItem(position);
 
-                //todo: Stage 2, add intent for playing track
+                //callback to main or top tracks activity depending on tw pane unit
+                ((Callback)getActivity()).onTrackSelected(track);
             }
         });
 
@@ -98,8 +116,13 @@ public class TopTracksFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
+    private void updateArtist(ArtistItem artist) {
+        getTopTracks(artist.id);
+        setActionBarSubtitle(artist.name);
+    }
+
     private void setActionBarSubtitle(String subTitle){
-        ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
+        ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
 
         if(actionBar != null)
             actionBar.setSubtitle(subTitle);
@@ -136,6 +159,7 @@ public class TopTracksFragment extends Fragment {
             try {
                 Tracks result = spotify.getArtistTopTrack(parameter[0], options);
 
+                //todo: use index instead, less overhead
                 for (Track track : result.tracks) {
 
                     tracks.add(new TrackItem(
@@ -165,6 +189,7 @@ public class TopTracksFragment extends Fragment {
                 trackAdapter.addAll(result);
             else
                 Toast.makeText(getActivity(), "No top tracks available", Toast.LENGTH_SHORT).show();
+            //todo: change to snackbar
 
         }
     }

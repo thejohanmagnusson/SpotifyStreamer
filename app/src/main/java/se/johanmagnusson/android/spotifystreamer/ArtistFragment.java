@@ -1,6 +1,5 @@
 package se.johanmagnusson.android.spotifystreamer;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -23,7 +22,6 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import retrofit.RetrofitError;
-import se.johanmagnusson.android.spotifystreamer.Common.Parameter;
 import se.johanmagnusson.android.spotifystreamer.Models.ArtistItem;
 
 
@@ -35,6 +33,11 @@ public class ArtistFragment extends Fragment {
     private List<ArtistItem> artists;
     private ArrayAdapter<ArtistItem> artistAdapter;
 
+    //callback interface to communicate with activities
+    public interface Callback {
+        public void onArtistSelected(ArtistItem artist);
+    }
+
     public ArtistFragment() {
     }
 
@@ -42,7 +45,7 @@ public class ArtistFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //check and restore data if available
+        //check and restore saved data if available
         if(savedInstanceState == null || !savedInstanceState.containsKey(ARTIST_KEY))
             artists = new ArrayList<ArtistItem>();
         else
@@ -68,20 +71,19 @@ public class ArtistFragment extends Fragment {
 
                 ArtistItem artist = artistAdapter.getItem(position);
 
-                //make intent for top tracks
-                Intent topTracksIntent = new Intent(getActivity(), TopTracksActivity.class);
-                topTracksIntent.putExtra(Parameter.ARTIST_ID, artist.id);
-                topTracksIntent.putExtra(Parameter.ARTIST_NAME, artist.name);
-                startActivity(topTracksIntent);
+                //callback to main activity method
+                ((Callback) getActivity()).onArtistSelected(artist);
             }
         });
+
+        //todo: last scroll position
 
         return rootView;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-
+        //save list of artists
         outState.putParcelableArrayList(ARTIST_KEY, (ArrayList<? extends Parcelable>) artists);
 
         super.onSaveInstanceState(outState);
@@ -135,6 +137,7 @@ public class ArtistFragment extends Fragment {
                 artistAdapter.addAll(result);
             else
                 Toast.makeText(getActivity(), "No artist found.", Toast.LENGTH_SHORT).show();
+            //todo: change to snackbar
         }
     }
 }
