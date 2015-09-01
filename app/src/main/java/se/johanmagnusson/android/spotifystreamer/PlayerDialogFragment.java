@@ -244,12 +244,9 @@ public class PlayerDialogFragment extends DialogFragment {
 
         Log.d(LOG_TAG, "initialize connection");
 
-        //todo: shift start and bind?
-        Intent intent = new Intent(getActivity(), PlayerService.class);
-        getActivity().startService(intent);
-
         //try to bind to service to see if it is running, mConnection sets mBound in onServiceConnected
         if(!mBound) {
+            Intent intent = new Intent(getActivity(), PlayerService.class);
             getActivity().bindService (intent, mConnection, getActivity().BIND_AUTO_CREATE);
             Log.d(LOG_TAG, "started/bound to service");
         }
@@ -283,16 +280,20 @@ public class PlayerDialogFragment extends DialogFragment {
             PlayerService.PlayerBinder binder = (PlayerService.PlayerBinder) service;
             mPlayerService = binder.getService();
             mBound = true;
+
+            Intent intent = new Intent(getActivity(), PlayerService.class);
+            getActivity().startService(intent);
+
             Log.d(LOG_TAG, "Service connected.");
 
             if( mAutoPlayPosition != -1) {
 //                mPlayerService.addTracks(mTracks);
 //                mPlayerService.playTrack(mAutoPlayPosition);
 
-                Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_PLAY);
-                intent.putParcelableArrayListExtra(PlayerService.EXTRA_TRACKS, (ArrayList<? extends Parcelable>) mTracks);
-                intent.putExtra(PlayerService.EXTRA_SELECTED_TRACK, mAutoPlayPosition);
-                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                Intent playIntent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_PLAY);
+                playIntent.putParcelableArrayListExtra(PlayerService.EXTRA_TRACKS, (ArrayList<? extends Parcelable>) mTracks);
+                playIntent.putExtra(PlayerService.EXTRA_SELECTED_TRACK, mAutoPlayPosition);
+                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(playIntent);
             }
         }
 
