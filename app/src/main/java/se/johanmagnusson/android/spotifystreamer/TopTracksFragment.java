@@ -1,6 +1,5 @@
 package se.johanmagnusson.android.spotifystreamer;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,72 +35,69 @@ import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
 public class TopTracksFragment extends Fragment {
 
     private final String LOG_TAG = TopTracksFragment.class.getSimpleName();
-    private final String TRACKS_KEY = "tracks";
+    private final String LAST_SCROLL_POSITION_KEY = "last_scroll_position";
     static String ARTIST_KEY = "artist";
+    private final String TRACKS_KEY = "tracks";
 
-    private List<TrackItem> topTracks;
-    private ArrayAdapter<TrackItem> trackAdapter;
+    private ListView mListView;
+    private String mArtist;
+    private List<TrackItem> mTopTracks;
+    private ArrayAdapter<TrackItem> mTrackAdapter;
+    private int mLastScrollPosition;
 
-    //callback interface to communicate with activities
+    //callback for activity
     public interface Callback {
-        public void onTrackSelected(TrackItem track);
+        void onTrackSelected(List<TrackItem> tracks, int position);
     }
 
     public TopTracksFragment() {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        //todo: fix so tracks are retained after return from player
-        //check and restore data if available
-        if(savedInstanceState == null || !savedInstanceState.containsKey(TRACKS_KEY))
-            topTracks = new ArrayList<TrackItem>();
-        else
-            topTracks = savedInstanceState.getParcelableArrayList(TRACKS_KEY);
-
-        trackAdapter = new TrackAdapter(getActivity(), topTracks);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        //todo: add check for other keys
+        if(savedInstanceState == null) {
+            Log.d(LOG_TAG, "No saved data available");
 
-        //todo: args/intent handling not good. Try remove intent and just use args.
-        Bundle args = getArguments();
+            mTopTracks = new ArrayList<TrackItem>();
 
-        if(args != null) {
-            updateArtist((ArtistItem) args.getParcelable(ARTIST_KEY));
+            Bundle args = getArguments();
+
+            if(args != null && args.containsKey(ARTIST_KEY)) {
+                Log.d(LOG_TAG, "Bundled data available");
+
+                ArtistItem artist = args.getParcelable(ARTIST_KEY);
+                mArtist = artist.name;
+                getTopTracks(artist.id);
+            }
+            else
+                Log.d(LOG_TAG, "No bundled data available");
+
         }
         else {
-            Intent intent = getActivity().getIntent();
-
-            if (intent != null) {
-                if(savedInstanceState == null) {
-                    ArtistItem artist = intent.getParcelableExtra(ARTIST_KEY);
-                    if(artist != null)
-                        updateArtist(artist);
-                }
-
-            }
+            Log.d(LOG_TAG, "Saved data available");
+            mArtist = savedInstanceState.getString(ARTIST_KEY);
+            mTopTracks = savedInstanceState.getParcelableArrayList(TRACKS_KEY);
+            mLastScrollPosition = savedInstanceState.getInt(LAST_SCROLL_POSITION_KEY);
         }
 
+        setActionBarSubtitle(mArtist);
+        mTrackAdapter = new TrackAdapter(getActivity(), mTopTracks);
 
         View rootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
 
-        trackAdapter = new TrackAdapter(getActivity(), topTracks);
-
         //set adapter for list and set listener for item click
-        ListView listView = (ListView) rootView.findViewById(R.id.top_tracks_listview);
-        listView.setAdapter(trackAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView = (ListView) rootView.findViewById(R.id.top_tracks_listview);
+        mListView.setAdapter(mTrackAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                TrackItem track = trackAdapter.getItem(position);
+                mLastScrollPosition = position;
+                TrackItem track = mTrackAdapter.getItem(position);
 
-                //callback to main or top tracks activity depending on tw pane unit
-                ((Callback)getActivity()).onTrackSelected(track);
+                //callback to main or top tracks activity depending if two pane unit
+                ((Callback) getActivity()).onTrackSelected(mTopTracks, position);
             }
         });
 
@@ -109,16 +105,25 @@ public class TopTracksFragment extends Fragment {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        outState.putParcelableArrayList(TRACKS_KEY, (ArrayList<? extends Parcelable>) topTracks);
-
-        super.onSaveInstanceState(outState);
+        //restore scroll position
+        if( mLastScrollPosition != mListView.INVALID_POSITION)
+            mListView.smoothScrollToPosition(mLastScrollPosition);
     }
 
-    private void updateArtist(ArtistItem artist) {
-        getTopTracks(artist.id);
-        setActionBarSubtitle(artist.name);
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        //artist and tracks
+        outState.putString(ARTIST_KEY, mArtist);
+        outState.putParcelableArrayList(TRACKS_KEY, (ArrayList<? extends Parcelable>) mTopTracks);
+
+        //scroll position
+        if( mLastScrollPosition != mListView.INVALID_POSITION)
+            outState.putInt(LAST_SCROLL_POSITION_KEY, mLastScrollPosition);
+
+        super.onSaveInstanceState(outState);
     }
 
     private void setActionBarSubtitle(String subTitle){
@@ -132,10 +137,10 @@ public class TopTracksFragment extends Fragment {
         new GetTopTracksTask().execute(artistId);
     }
 
-
     public class GetTopTracksTask extends AsyncTask<String, Void, List<TrackItem>> {
 
         private static final String COUNTRY = "country";
+        private static final String SHARE_URL = "spotify";
 
         private final String LOG_TAG = GetTopTracksTask.class.getSimpleName();
 
@@ -164,10 +169,14 @@ public class TopTracksFragment extends Fragment {
 
                     tracks.add(new TrackItem(
                             track.name,
+                            track.artists.size() > 0 ? track.artists.get(0).name : "",
                             track.album.name,
                             track.album.images.size() > 1 ? track.album.images.get(track.album.images.size() - 2).url : null,
                             track.album.images.size() > 0 ? track.album.images.get(0).url : null,
-                            track.preview_url));
+                            track.duration_ms,
+                            track.preview_url,
+                            track.external_urls.containsKey(SHARE_URL) ? track.external_urls.get(SHARE_URL) : "")
+                    );
                 }
             }
             catch (RetrofitError error){
@@ -183,10 +192,10 @@ public class TopTracksFragment extends Fragment {
         @Override
         protected void onPostExecute(List<TrackItem> result) {
 
-            trackAdapter.clear();
+            mTrackAdapter.clear();
 
             if (result.size() > 0)
-                trackAdapter.addAll(result);
+                mTrackAdapter.addAll(result);
             else
                 Toast.makeText(getActivity(), "No top tracks available", Toast.LENGTH_SHORT).show();
             //todo: change to snackbar

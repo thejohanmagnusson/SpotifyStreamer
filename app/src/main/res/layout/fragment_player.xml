@@ -9,31 +9,27 @@
     <TextView
         android:id="@+id/player_artist_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Coldplay"/>
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/player_album_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ghost Stories" />
+        android:layout_height="wrap_content" />
 
     <ImageView
-        android:id="@+id/player_album_artwork"
+        android:id="@+id/player_track_artwork"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:src="@drawable/default_list_icon"/>
+        android:layout_marginBottom="8dp" />
 
     <TextView
         android:id="@+id/player_track_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="A Sky Full of Stars"/>
+        android:layout_height="wrap_content" />
 
     <SeekBar
-        android:id="@+id/player_duration_bar"
+        android:id="@+id/player_seekbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         />
@@ -46,14 +42,12 @@
             android:id="@+id/player_duration_played"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="00:00"/>
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/player_duration_left"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00:30"/>
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 
@@ -66,19 +60,18 @@
             android:id="@+id/player_action_previous"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_previous"/>
+            android:src="@android:drawable/ic_media_previous" />
 
         <ImageButton
-            android:id="@+id/player_action_play"
+            android:id="@+id/player_action_play_pause"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_play"/>
+            android:layout_height="wrap_content" />
 
         <ImageButton
             android:id="@+id/player_action_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_next"/>
+            android:src="@android:drawable/ic_media_next" />
     </LinearLayout>
 
 </LinearLayout>

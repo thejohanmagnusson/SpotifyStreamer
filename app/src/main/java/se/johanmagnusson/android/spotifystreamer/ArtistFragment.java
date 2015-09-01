@@ -28,10 +28,13 @@ import se.johanmagnusson.android.spotifystreamer.Models.ArtistItem;
 public class ArtistFragment extends Fragment {
 
     private final String LOG_TAG = ArtistFragment.class.getSimpleName();
+    private final String LAST_SCROLL_POSITION_KEY = "last_scroll_position";
     private final String ARTIST_KEY = "artist";
 
-    private List<ArtistItem> artists;
-    private ArrayAdapter<ArtistItem> artistAdapter;
+    private ListView mListView;
+    private List<ArtistItem> mArtists;
+    private ArrayAdapter<ArtistItem> mArtistAdapter;
+    private int mLastScrollPosition;
 
     //callback interface to communicate with activities
     public interface Callback {
@@ -47,11 +50,11 @@ public class ArtistFragment extends Fragment {
 
         //check and restore saved data if available
         if(savedInstanceState == null || !savedInstanceState.containsKey(ARTIST_KEY))
-            artists = new ArrayList<ArtistItem>();
+            mArtists = new ArrayList<ArtistItem>();
         else
-            artists = savedInstanceState.getParcelableArrayList(ARTIST_KEY);
+            mArtists = savedInstanceState.getParcelableArrayList(ARTIST_KEY);
 
-        artistAdapter = new ArtistAdapter(getActivity(), artists);
+        mArtistAdapter = new ArtistAdapter(getActivity(), mArtists);
 
         //enable menu from this fragment
         setHasOptionsMenu(true);
@@ -63,28 +66,40 @@ public class ArtistFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_artist,container, false);
 
         //set adapter for list and set listener for item click
-        ListView listView = (ListView) rootView.findViewById(R.id.artist_listview);
-        listView.setAdapter(artistAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView = (ListView) rootView.findViewById(R.id.artist_listview);
+        mListView.setAdapter(mArtistAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                ArtistItem artist = artistAdapter.getItem(position);
+                mLastScrollPosition = position;
+                ArtistItem artist = mArtistAdapter.getItem(position);
 
                 //callback to main activity method
                 ((Callback) getActivity()).onArtistSelected(artist);
             }
         });
 
-        //todo: last scroll position
-
         return rootView;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if(savedInstanceState != null && savedInstanceState.containsKey(LAST_SCROLL_POSITION_KEY)) {
+            mLastScrollPosition = savedInstanceState.getInt(LAST_SCROLL_POSITION_KEY);
+            mListView.smoothScrollToPosition(mLastScrollPosition);
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         //save list of artists
-        outState.putParcelableArrayList(ARTIST_KEY, (ArrayList<? extends Parcelable>) artists);
+        outState.putParcelableArrayList(ARTIST_KEY, (ArrayList<? extends Parcelable>) mArtists);
+
+        if( mLastScrollPosition != mListView.INVALID_POSITION)
+            outState.putInt(LAST_SCROLL_POSITION_KEY, mLastScrollPosition);
 
         super.onSaveInstanceState(outState);
     }
@@ -131,10 +146,10 @@ public class ArtistFragment extends Fragment {
         @Override
         protected void onPostExecute(List<ArtistItem> result){
 
-            artistAdapter.clear();
+            mArtistAdapter.clear();
 
             if(result.size() > 0)
-                artistAdapter.addAll(result);
+                mArtistAdapter.addAll(result);
             else
                 Toast.makeText(getActivity(), "No artist found.", Toast.LENGTH_SHORT).show();
             //todo: change to snackbar

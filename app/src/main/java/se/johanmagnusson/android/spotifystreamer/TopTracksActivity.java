@@ -2,10 +2,15 @@ package se.johanmagnusson.android.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import se.johanmagnusson.android.spotifystreamer.Models.ArtistItem;
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
 
 
@@ -17,9 +22,19 @@ public class TopTracksActivity extends AppCompatActivity implements TopTracksFra
 
         setContentView(R.layout.activity_top_tracks);
 
-        //add fragment
-        if(savedInstanceState == null)
-            getSupportFragmentManager().beginTransaction().add(R.id.track_container, new TopTracksFragment()).commit();
+        if(savedInstanceState == null) {
+            ArtistItem artist = getIntent().getParcelableExtra(TopTracksFragment.ARTIST_KEY);
+
+            TopTracksFragment topTracksFragment = new TopTracksFragment();
+
+            if(artist != null) {
+                Bundle args = new Bundle();
+                args.putParcelable(TopTracksFragment.ARTIST_KEY, artist);
+                topTracksFragment.setArguments(args);
+            }
+
+            getSupportFragmentManager().beginTransaction().add(R.id.track_container, topTracksFragment).commit();
+        }
     }
 
 
@@ -45,10 +60,27 @@ public class TopTracksActivity extends AppCompatActivity implements TopTracksFra
     }
 
     @Override
-    public void onTrackSelected(TrackItem track) {
+    public void onTrackSelected(List<TrackItem> tracks, int position) {
         //no need to check device size since this activity will only exist on devices defined as not large.
-        Intent intent = new Intent(this, PlayerActivity.class);
-        intent.putExtra(PlayerDialogFragment.TRACK_KEY, track);
+        //start player
+        Intent intent = new Intent(getApplication(), PlayerActivity.class);
+        intent.putExtra(PlayerDialogFragment.PLAY_TRACK_POSITION_KEY, position);
+        intent.putExtra(PlayerDialogFragment.TRACKS_KEY, (ArrayList<? extends Parcelable>) tracks);
         startActivity(intent);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

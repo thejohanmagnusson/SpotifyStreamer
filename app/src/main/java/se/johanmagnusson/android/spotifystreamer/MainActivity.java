@@ -4,10 +4,14 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import se.johanmagnusson.android.spotifystreamer.Models.ArtistItem;
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
@@ -84,12 +88,12 @@ public class MainActivity extends AppCompatActivity implements ArtistFragment.Ca
         return super.onOptionsItemSelected(item);
     }
 
-
+    //callback from artist fragment
     @Override
     public void onArtistSelected(ArtistItem artist) {
 
         if(mTwoPane) {
-            //replace fragment and set data with bundle
+            //replace fragment and set data with argument
             Bundle args = new Bundle();
             args.putParcelable(TopTracksFragment.ARTIST_KEY, artist);
 
@@ -99,22 +103,26 @@ public class MainActivity extends AppCompatActivity implements ArtistFragment.Ca
             getSupportFragmentManager().beginTransaction().replace(R.id.track_container, topTracksFragment, TRACK_FRAGMENT_TAG).commit();
         }
         else {
-            //new activity and set data with bundle
+            //new activity and set data with extra
             Intent intent = new Intent(this, TopTracksActivity.class).putExtra(TopTracksFragment.ARTIST_KEY, artist);
             startActivity(intent);
         }
     }
-
+    //callback from top tracks fragment
     @Override
-    public void onTrackSelected(TrackItem track) {
-        //no need to check device size since this method will only be called from devices that uses the two pane view
+    public void onTrackSelected(List<TrackItem> tracks, int position) {
+        //todo: remove line? no need to check device size since this method will only be called from devices that uses the two pane view
+
+        //add tracks and index of selected track for auto play
         Bundle args = new Bundle();
-        args.putParcelable(PlayerDialogFragment.TRACK_KEY, args);
+        args.putInt(PlayerDialogFragment.PLAY_TRACK_POSITION_KEY, position);
+        args.putParcelableArrayList(PlayerDialogFragment.TRACKS_KEY, (ArrayList<? extends Parcelable>) tracks);
 
-        PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
-
-        playerDialogFragment.setArguments(args);
-        playerDialogFragment.show(getSupportFragmentManager(), PLAYER_DIALOG_FRAGMENT_TAG);
+        if(mTwoPane) {
+            PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
+            playerDialogFragment.setArguments(args);
+            playerDialogFragment.show(getSupportFragmentManager(), PLAYER_DIALOG_FRAGMENT_TAG);
+        }
     }
 }
 

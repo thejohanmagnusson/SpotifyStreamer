@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="se.johanmagnusson.android.spotifystreamer" >
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -15,7 +16,6 @@
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -26,18 +26,13 @@
         <activity
             android:name=".TopTracksActivity"
             android:label="@string/title_activity_top_tracks"
+            android:launchMode="singleTop"
             android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="se.johanmagnusson.android.spotifystreamer.MainActivity" />
         </activity>
         <activity
             android:name=".PlayerActivity"
-            android:label="Player"
-            android:parentActivityName=".TopTracksActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="se.johanmagnusson.android.spotifystreamer.TopTracksActivity" />
+            android:label="@string/app_name"
+            android:parentActivityName=".TopTracksActivity" >
         </activity>
         <activity
             android:name=".SettingsActivity"
@@ -47,6 +42,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="se.johanmagnusson.android.spotifystreamer.MainActivity" />
         </activity>
+        <service
+            android:name=".service.PlayerService"
+            android:exported="false"/>
+
     </application>
 
 </manifest>
