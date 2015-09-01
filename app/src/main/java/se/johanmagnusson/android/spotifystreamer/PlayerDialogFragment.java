@@ -142,9 +142,10 @@ public class PlayerDialogFragment extends DialogFragment {
             public void onClick(View v) {
 //                if (mBound)
 //                    mPlayerService.previous();
-
-                Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_PREVIOUS);
-                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                if(mBound) {
+                    Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_PREVIOUS);
+                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                }
             }
         });
 
@@ -160,8 +161,10 @@ public class PlayerDialogFragment extends DialogFragment {
 //                        mPlayerService.resume();
 //                    }
 //                }
-                Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_PAUSE_RESUME);
-                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                if(mBound) {
+                    Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_PAUSE_RESUME);
+                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                }
             }
         });
 
@@ -170,8 +173,10 @@ public class PlayerDialogFragment extends DialogFragment {
             public void onClick(View v) {
 //                if (mBound)
 //                    mPlayerService.next();
-                Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_NEXT);
-                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                if(mBound) {
+                    Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_NEXT);
+                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                }
             }
         });
 
@@ -237,17 +242,15 @@ public class PlayerDialogFragment extends DialogFragment {
     public void onStart() {
         super.onStart();
 
-        initializeConnection();
-    }
-
-    private void initializeConnection() {
         Log.d(LOG_TAG, "initialize connection");
 
+        //todo: shift start and bind?
+        Intent intent = new Intent(getActivity(), PlayerService.class);
+        getActivity().startService(intent);
+
         //try to bind to service to see if it is running, mConnection sets mBound in onServiceConnected
-        //todo: problemet ligger här, skapar en ny service istället för att ansluta till den befintliga
         if(!mBound) {
-            Intent intent = new Intent(getActivity(), PlayerService.class);
-            getActivity().bindService(intent, mConnection, getActivity().BIND_AUTO_CREATE);
+            getActivity().bindService (intent, mConnection, getActivity().BIND_AUTO_CREATE);
             Log.d(LOG_TAG, "started/bound to service");
         }
     }
@@ -259,7 +262,6 @@ public class PlayerDialogFragment extends DialogFragment {
         //stop listening for intents from player
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver);
 
-        //todo: remove
         if(mBound) {
             getActivity().unbindService(mConnection);
             mBound = false;
