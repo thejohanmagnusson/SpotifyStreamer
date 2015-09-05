@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -23,7 +22,6 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
@@ -34,6 +32,7 @@ public class PlayerDialogFragment extends DialogFragment {
     private final String LOG_TAG = PlayerDialogFragment.class.getSimpleName();
     public static String TRACKS_KEY = "tracks";
     public static String PLAY_TRACK_POSITION_KEY = "position";
+    public static String SEEKBAR_VALUE_KEY = "seekbar-value";
 
     private List<TrackItem> mTracks = null;
     private int mAutoPlayPosition = -1;
@@ -61,6 +60,7 @@ public class PlayerDialogFragment extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //set receiver for service intents
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -70,57 +70,30 @@ public class PlayerDialogFragment extends DialogFragment {
 
                     switch (intent.getStringExtra(PlayerService.STATE)){
                         case PlayerService.STATE_PLAY:
-                            updateTrackView((TrackItem) intent.getParcelableExtra(PlayerService.EXTRA_CURRENT_TRACK), intent.getIntExtra(PlayerService.EXTRA_TRACK_DURATION, 0));
-                            setPlayOrPauseButton(true);
+                            if(mBound){
+                                updateTrackView();
+                                setPlayOrPauseButton(true);
+                            }
                             break;
-                        case PlayerService.STATE_PAUSE:
-                            setPlayOrPauseButton(false);
-                            break;
-                        case PlayerService.STATE_RESUME:
-                            setPlayOrPauseButton(true);
+                        case PlayerService.STATE_PAUSE_RESUME:
+                            if(mBound)
+                                setPlayOrPauseButton(mPlayerService.isPlaying());
                             break;
                         case PlayerService.STATE_TRACK_PROGRESS:
-                            if(!mScrubing) {
+                            if(!mScrubing)
                                 updateTrackProgress(intent.getIntExtra(PlayerService.EXTRA_TRACK_PROGRESS, 0));
-                            }
                             break;
                     }
                 }
             }
         };
 
-        //register for intents from player
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver, new IntentFilter(PlayerService.SERVICE_STATE_INTENT));
-    }
-
-    private void setPlayOrPauseButton(boolean isPlaying) {
-        if(isPlaying)
-            playPauseBtn.setImageResource(android.R.drawable.ic_media_pause);
-        else
-            playPauseBtn.setImageResource(android.R.drawable.ic_media_play);
+        //registering for intents when binding/creating service
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        if(savedInstanceState == null || !savedInstanceState.containsKey(TRACKS_KEY)) {
-            Log.d(LOG_TAG, "No saved data available");
-
-            Bundle args = getArguments();
-
-            if(args != null && args.containsKey(TRACKS_KEY)) {
-                Log.d(LOG_TAG, "Bundled data available");
-
-                mTracks = args.getParcelableArrayList(TRACKS_KEY);
-                mAutoPlayPosition = args.getInt(PLAY_TRACK_POSITION_KEY);
-            }
-        }
-        else {
-            Log.d(LOG_TAG, "Saved data available");
-            mTracks = savedInstanceState.getParcelableArrayList(TRACKS_KEY);
-            mAutoPlayPosition = -1;
-        }
 
         View rootView = inflater.inflate(R.layout.fragment_player, container, false);
 
@@ -135,48 +108,49 @@ public class PlayerDialogFragment extends DialogFragment {
         playPauseBtn = (ImageButton) rootView.findViewById(R.id.player_action_play_pause);
         nextBtn = (ImageButton) rootView.findViewById(R.id.player_action_next);
 
-        setPlayOrPauseButton(true);
+        if(savedInstanceState == null) {
 
+            Bundle args = getArguments();
+
+            if(args != null && args.containsKey(TRACKS_KEY)) {
+
+                mTracks = args.getParcelableArrayList(TRACKS_KEY);
+                mAutoPlayPosition = args.getInt(PLAY_TRACK_POSITION_KEY);
+            }
+        }
+        else {
+            Log.d(LOG_TAG, "Saved data available");
+            seekBar.setProgress(savedInstanceState.getInt(SEEKBAR_VALUE_KEY));
+        }
+
+        setPlayOrPauseButton(true);
+        setUiListeners();
+
+        return rootView;
+    }
+
+    private void setUiListeners(){
         previousBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                if (mBound)
-//                    mPlayerService.previous();
-                if(mBound) {
-                    Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_PREVIOUS);
-                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
-                }
+                if (mBound)
+                    mPlayerService.previous();
             }
         });
 
         playPauseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                if (mBound) {
-//                    if (mPlayerService.isPlaying()) {
-//                        Log.d(LOG_TAG, "Pause");
-//                        mPlayerService.pause();
-//                    } else {
-//                        Log.d(LOG_TAG, "Resume");
-//                        mPlayerService.resume();
-//                    }
-//                }
-                if(mBound) {
-                    Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_PAUSE_RESUME);
-                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
-                }
+                if (mBound)
+                    mPlayerService.pauseResume();
             }
         });
 
         nextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                if (mBound)
-//                    mPlayerService.next();
-                if(mBound) {
-                    Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_NEXT);
-                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
-                }
+                if (mBound)
+                    mPlayerService.next();
             }
         });
 
@@ -195,36 +169,37 @@ public class PlayerDialogFragment extends DialogFragment {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
-                if (mBound) {
-                    Log.d(LOG_TAG, "Seek to: " + seekBar.getProgress());
+                if (mBound)
+                    mPlayerService.seekTo(seekBar.getProgress());
 
-                    Intent intent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_SEEK_TO);
-                    intent.putExtra(PlayerService.EXTRA_SEEK_TO, seekBar.getProgress());
-                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
-
-                    //mPlayerService.seekTo(seekBar.getProgress());
-                }
                 mScrubing = false;
             }
         });
-
-        return rootView;
     }
 
-    private void updateTrackView(TrackItem track, int trackDuration) {
+    private void setPlayOrPauseButton(boolean isPlaying) {
+        if(isPlaying)
+            playPauseBtn.setImageResource(android.R.drawable.ic_media_pause);
+        else
+            playPauseBtn.setImageResource(android.R.drawable.ic_media_play);
+    }
+
+    private void updateTrackView() {
+        TrackItem track = mPlayerService.getCurrentTrack();
+
         artistName.setText(track.artist);
         albumName.setText(track.album);
 
-        //todo: add empty on loading image so controls don´t jump up and down or change so controls are aligned to bottom of the view
         Picasso.with(getActivity())
                 .load(track.imageUrlLarge)
-                .error(R.drawable.default_list_icon)    //use default image on error
+                .placeholder(R.drawable.default_list_icon)
+                .error(R.drawable.default_list_icon)
                 .into(trackArtwork);
 
         trackName.setText(track.name);
-        durationPlayed.setText(formatTrackTime(0));
-        seekBar.setMax(trackDuration);
-        duration.setText(formatTrackTime(trackDuration));
+        seekBar.setMax((int) track.duration);
+        durationPlayed.setText(formatTrackTime(mPlayerService.getCurrentTrackProgress()));
+        duration.setText(formatTrackTime((int)track.duration));
     }
 
     private void updateTrackProgress(int progress) {
@@ -238,38 +213,53 @@ public class PlayerDialogFragment extends DialogFragment {
         return String.format("%02d:%02d", min, sec);
     }
 
+    private void bindStartRegisterService(){
+        //bind/create service, mConnection sets mBound in onServiceConnected
+        if(!mBound) {
+            Intent intent = new Intent(getActivity(), PlayerService.class);
+            getActivity().bindService(intent, mConnection, getActivity().BIND_AUTO_CREATE);
+
+            //register for intents from service
+            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver, new IntentFilter(PlayerService.SERVICE_STATE_INTENT));
+        }
+    }
+
+    private void unbindUnregisterService(){
+        if(mBound) {
+            getActivity().unbindService(mConnection);
+            mBound = false;
+
+            //stop listening for intents from service
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver);
+        }
+    }
+
     @Override
     public void onStart() {
         super.onStart();
 
-        Log.d(LOG_TAG, "initialize connection");
-
-        //try to bind to service to see if it is running, mConnection sets mBound in onServiceConnected
-        if(!mBound) {
-            Intent intent = new Intent(getActivity(), PlayerService.class);
-            getActivity().bindService (intent, mConnection, getActivity().BIND_AUTO_CREATE);
-            Log.d(LOG_TAG, "started/bound to service");
-        }
+        bindStartRegisterService();
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        //stop listening for intents from player
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver);
-
-        if(mBound) {
-            getActivity().unbindService(mConnection);
-            mBound = false;
-        }
+        unbindUnregisterService();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(TRACKS_KEY, (ArrayList<? extends Parcelable>) mTracks);
+        outState.putInt(SEEKBAR_VALUE_KEY, seekBar.getProgress());
 
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        bindStartRegisterService();
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -277,30 +267,30 @@ public class PlayerDialogFragment extends DialogFragment {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
 
+            //get binder to call methods from service
             PlayerService.PlayerBinder binder = (PlayerService.PlayerBinder) service;
             mPlayerService = binder.getService();
             mBound = true;
 
+            //use start so service dosn´t stop when binding is released
             Intent intent = new Intent(getActivity(), PlayerService.class);
             getActivity().startService(intent);
 
-            Log.d(LOG_TAG, "Service connected.");
+            //update ui with current track
+            if(mPlayerService.isPlayingOrPaused())
+                updateTrackView();
 
+            //handle auto playing of selected track
             if( mAutoPlayPosition != -1) {
-//                mPlayerService.addTracks(mTracks);
-//                mPlayerService.playTrack(mAutoPlayPosition);
-
-                Intent playIntent = new Intent(PlayerService.SERVICE_CONTROL_INTENT).putExtra(PlayerService.CONTROL, PlayerService.CONTROL_PLAY);
-                playIntent.putParcelableArrayListExtra(PlayerService.EXTRA_TRACKS, (ArrayList<? extends Parcelable>) mTracks);
-                playIntent.putExtra(PlayerService.EXTRA_SELECTED_TRACK, mAutoPlayPosition);
-                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(playIntent);
+                mPlayerService.addTracks(mTracks);
+                mPlayerService.playTrack(mAutoPlayPosition);
+                mAutoPlayPosition = -1;
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-            Log.d(LOG_TAG, "Service disconnected.");
+            unbindUnregisterService();
         }
     };
 }

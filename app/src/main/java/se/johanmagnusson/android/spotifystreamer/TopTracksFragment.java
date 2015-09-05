@@ -164,7 +164,6 @@ public class TopTracksFragment extends Fragment {
             try {
                 Tracks result = spotify.getArtistTopTrack(parameter[0], options);
 
-                //todo: use index instead, less overhead
                 for (Track track : result.tracks) {
 
                     tracks.add(new TrackItem(
