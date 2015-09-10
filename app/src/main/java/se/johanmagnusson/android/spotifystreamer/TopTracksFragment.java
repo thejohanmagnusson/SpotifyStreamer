@@ -32,7 +32,7 @@ import se.johanmagnusson.android.spotifystreamer.Models.ArtistItem;
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
 
 
-public class TopTracksFragment extends Fragment {
+public class TopTracksFragment extends Fragment{
 
     private final String LOG_TAG = TopTracksFragment.class.getSimpleName();
     private final String LAST_SCROLL_POSITION_KEY = "last_scroll_position";
@@ -55,27 +55,19 @@ public class TopTracksFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //todo: add check for other keys
         if(savedInstanceState == null) {
-            Log.d(LOG_TAG, "No saved data available");
-
             mTopTracks = new ArrayList<TrackItem>();
 
             Bundle args = getArguments();
 
             if(args != null && args.containsKey(ARTIST_KEY)) {
-                Log.d(LOG_TAG, "Bundled data available");
-
                 ArtistItem artist = args.getParcelable(ARTIST_KEY);
                 mArtist = artist.name;
                 getTopTracks(artist.id);
             }
-            else
-                Log.d(LOG_TAG, "No bundled data available");
 
         }
         else {
-            Log.d(LOG_TAG, "Saved data available");
             mArtist = savedInstanceState.getString(ARTIST_KEY);
             mTopTracks = savedInstanceState.getParcelableArrayList(TRACKS_KEY);
             mLastScrollPosition = savedInstanceState.getInt(LAST_SCROLL_POSITION_KEY);
