@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements ArtistFragment.Ca
     private final String PLAYER_DIALOG_FRAGMENT_TAG = "PDFTAG";
 
     private boolean mTwoPane;
+    private String mLastQuery = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements ArtistFragment.Ca
             mTwoPane = false;
             getSupportActionBar().setElevation(0f);
         }
+
+        //set default values to settings, only done on entering the app for the first time
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
     }
 
     @Override
@@ -50,13 +55,17 @@ public class MainActivity extends AppCompatActivity implements ArtistFragment.Ca
         super.onNewIntent(intent);
 
         if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
 
-            //make search query in fragment
-            ArtistFragment artistFragment = (ArtistFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_artists);
+            if(!mLastQuery.equalsIgnoreCase(query)) {
+                mLastQuery = query;
+                //make search query in fragment
+                ArtistFragment artistFragment = (ArtistFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_artists);
 
-            if(artistFragment != null){
-                String query = intent.getStringExtra(SearchManager.QUERY);
-                artistFragment.searchArtist(query);
+                if (artistFragment != null) {
+                    //String query = intent.getStringExtra(SearchManager.QUERY);
+                    artistFragment.searchArtist(query);
+                }
             }
         }
     }

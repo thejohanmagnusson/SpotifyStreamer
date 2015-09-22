@@ -44,7 +44,8 @@ public class ArtistAdapter extends ArrayAdapter<ArtistItem> {
 
         Picasso.with(getContext())
                 .load(artist.imageUrl)
-                .error(R.drawable.default_list_icon)    //use default image on error
+                .placeholder(R.drawable.ic_music_circle_grey600_48dp)
+                .error(R.drawable.ic_music_circle_grey600_48dp)    //use default image on error
                 .fit()
                 .centerCrop()
                 .into(viewHolder.artistIcon);

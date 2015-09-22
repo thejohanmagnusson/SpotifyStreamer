@@ -45,7 +45,8 @@ public class TrackAdapter extends ArrayAdapter<TrackItem> {
 
         Picasso.with(getContext())
                 .load(track.imageUrlSmall)
-                .error(R.drawable.default_list_icon)    //use default image on error
+                .placeholder(R.drawable.ic_music_circle_grey600_48dp)
+                .error(R.drawable.ic_music_circle_grey600_48dp)    //use default image on error
                 .fit()
                 .centerCrop()
                 .into(viewHolder.trackImage);

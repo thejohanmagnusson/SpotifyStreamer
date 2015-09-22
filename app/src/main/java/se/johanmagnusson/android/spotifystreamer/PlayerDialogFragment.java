@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -47,54 +48,41 @@ public class PlayerDialogFragment extends DialogFragment {
     //service
     private PlayerService mPlayerService;
     private boolean mBound = false;
-    private BroadcastReceiver mBroadcastReceiver;
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if(action.equalsIgnoreCase(PlayerService.ACTION_ON_PREPARING)) {
+                setTrackArtAndText((TrackItem)intent.getParcelableExtra(PlayerService.EXTRA_TRACK));
+                setTrackDurationSeekBar(0);
+                updateTrackProgress(0);
+            }
+            else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_PLAY)) {
+                setTrackDurationSeekBar(intent.getIntExtra(PlayerService.EXTRA_DURATION, 0));
+            }
+            else if(action.equalsIgnoreCase(PlayerService.ACTION_PROGRESS)) {
+                if(!mScrubing)
+                    updateTrackProgress(intent.getIntExtra(PlayerService.EXTRA_PROGRESS, 0));
+            }
+            else if(action.equalsIgnoreCase(PlayerService.ACTION_PAUSE)) {
+                setButtonsPlayingState(false);
+            }
+            else if(action.equalsIgnoreCase(PlayerService.ACTION_RESUME)) {
+                setButtonsPlayingState(true);
+            }
+            else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_COMPLETED)) {
+                getActivity().finish();
+            }
+        }
+    };
 
     //view buddies :)
     private List<TrackItem> mTracks = null;
     private int mPlayTrackPosition = -1;
     private boolean mScrubing;
 
-
     public PlayerDialogFragment(){
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        //todo: ta bort
-        //set receiver for service intents
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-
-                if(action == PlayerService.SERVICE_STATE_INTENT) {
-
-                    switch (intent.getStringExtra(PlayerService.STATE)){
-                        case PlayerService.STATE_PLAY:
-//                            if(mBound){
-//                                setTrackView();
-//                                setButtonsPlayingState(true);
-//                            }
-                            break;
-                        case PlayerService.STATE_PAUSE_RESUME:
-//                            if(mBound)
-  //                              setButtonsPlayingState(mPlayerService.isPlaying());
-                            break;
-                        case PlayerService.STATE_TRACK_PROGRESS:
-    //                        if(!mScrubing)
-      //                          updateTrackProgress(intent.getIntExtra(PlayerService.EXTRA_TRACK_PROGRESS, 0));
-                            break;
-                        case PlayerService.STATE_LAST_TRACK_COMPLETED:
-        //                    getActivity().finish();
-                            break;
-                    }
-                }
-            }
-        };
-        //todo: end of ta bort
-        //registering for intents when binding/creating service
     }
 
     @Nullable
@@ -163,7 +151,9 @@ public class PlayerDialogFragment extends DialogFragment {
             }
         });
 
-        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+
+        {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (mScrubing)
@@ -187,17 +177,15 @@ public class PlayerDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
+    public void onResume() {
+        super.onResume();
         bindStartRegisterService();
     }
 
     @Override
-    public void onStop() {
+    public void onPause() {
+        super.onPause();
         unbindUnregisterService();
-
-        super.onStop();
     }
 
     @Override
@@ -212,16 +200,19 @@ public class PlayerDialogFragment extends DialogFragment {
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        bindStartRegisterService();
-    }
-
     private void bindStartRegisterService(){
         //bind/create service, mConnection sets mBound in onServiceConnected
         if(!mBound) {
+            //register for intents
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(PlayerService.ACTION_ON_PREPARING);
+            intentFilter.addAction(PlayerService.ACTION_ON_PLAY);
+            intentFilter.addAction(PlayerService.ACTION_PROGRESS);
+            intentFilter.addAction(PlayerService.ACTION_PAUSE);
+            intentFilter.addAction(PlayerService.ACTION_RESUME);
+            intentFilter.addAction(PlayerService.ACTION_ON_COMPLETED);
+            getActivity().registerReceiver(mBroadcastReceiver, intentFilter);
+
             Intent intent = new Intent(getActivity(), PlayerService.class);
             getActivity().bindService(intent, mConnection, getActivity().BIND_AUTO_CREATE);
         }
@@ -229,6 +220,8 @@ public class PlayerDialogFragment extends DialogFragment {
 
     private void unbindUnregisterService(){
         if(mBound) {
+            getActivity().unregisterReceiver(mBroadcastReceiver);
+
             getActivity().unbindService(mConnection);
             mBound = false;
         }
@@ -243,7 +236,6 @@ public class PlayerDialogFragment extends DialogFragment {
             //get service and set bound
             PlayerService.PlayerBinder binder = (PlayerService.PlayerBinder) service;
             mPlayerService = binder.getService();
-            setPlayerServiceListeners();
             mBound = true;
 
             //use start so service doesn´t stop when binding is released
@@ -262,66 +254,23 @@ public class PlayerDialogFragment extends DialogFragment {
                     setTrackArtAndText(mPlayerService.getCurrentTrack());
                     setTrackDurationSeekBar(mPlayerService.getTrackDuration());
                     updateTrackProgress(mPlayerService.getPlayProgress());
+                    setButtonsPlayingState(mPlayerService.isPlaying());
                 }
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            unbindUnregisterService();
+            mPlayerService = null;
+            getActivity().finish();
         }
     };
 
-    private void setPlayerServiceListeners() {
-        mPlayerService.setOnPlayerServiceListener(new PlayerService.OnPlayerServiceListener() {
-            @Override
-            public void onPreparing(TrackItem track) {
-                setTrackArtAndText(track);
-                setTrackDurationSeekBar(0);
-                updateTrackProgress(0);
-            }
-
-            @Override
-            public void onPlay(int trueDuration) {
-                setTrackDurationSeekBar(trueDuration);
-            }
-
-            @Override
-            public void onPlayProgressChanged(int progress) {
-                //update seekbar
-                if(!mScrubing)
-                    updateTrackProgress(progress);
-            }
-
-            @Override
-            public void onPause() {
-                //change button to play
-                setButtonsPlayingState(false);
-            }
-
-            @Override
-            public void onResume() {
-                //change button to pause
-                setButtonsPlayingState(true);
-            }
-
-            @Override
-            public void onCompletion() {
-                getActivity().finish();
-            }
-
-            @Override
-            public void onError(String error) {
-                //show a simple error message
-            }
-        });
-    }
-
     private void setButtonsPlayingState(boolean isPlaying) {
         if(isPlaying)
-            mPlayPauseBtn.setImageResource(android.R.drawable.ic_media_pause);
+            mPlayPauseBtn.setImageResource(R.drawable.ic_pause_black_48dp);
         else
-            mPlayPauseBtn.setImageResource(android.R.drawable.ic_media_play);
+            mPlayPauseBtn.setImageResource(R.drawable.ic_play_black_48dp);
     }
 
     private void setTrackArtAndText(TrackItem track) {
@@ -339,18 +288,12 @@ public class PlayerDialogFragment extends DialogFragment {
 
     private void setTrackDurationSeekBar(int duration){
         mSeekBar.setMax(duration);
-        mDuration.setText(formatTrackTime(duration));
+        mDuration.setText(Utility.formatTrackTime(duration));
     }
 
     private void updateTrackProgress(int progress) {
-        mDurationPlayed.setText(formatTrackTime(progress));
+        mDurationPlayed.setText(Utility.formatTrackTime(progress));
         mSeekBar.setProgress(progress);
-    }
-
-    private String formatTrackTime(int timeSec) {
-        int sec = timeSec % 60;
-        int min = (timeSec / 60) % 60;
-        return String.format("%02d:%02d", min, sec);
     }
 }
 

@@ -3,6 +3,7 @@ package se.johanmagnusson.android.spotifystreamer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +31,8 @@ public class ArtistFragment extends Fragment {
     private final String LAST_SCROLL_POSITION_KEY = "last_scroll_position";
     private final String ARTIST_KEY = "artist";
 
+    private View mCoordinatorLayoutView;
+
     private ListView mListView;
     private List<ArtistItem> mArtists;
     private ArrayAdapter<ArtistItem> mArtistAdapter;
@@ -38,7 +40,7 @@ public class ArtistFragment extends Fragment {
 
     //callback interface to communicate with activities
     public interface Callback {
-        public void onArtistSelected(ArtistItem artist);
+        void onArtistSelected(ArtistItem artist);
     }
 
     public ArtistFragment() {
@@ -64,6 +66,7 @@ public class ArtistFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_artist,container, false);
+        mCoordinatorLayoutView = rootView.findViewById(R.id.artist_coordinatorlayout);
 
         //set adapter for list and set listener for item click
         mListView = (ListView) rootView.findViewById(R.id.artist_listview);
@@ -116,7 +119,6 @@ public class ArtistFragment extends Fragment {
 
         @Override
         protected List<ArtistItem> doInBackground(String... parameter) {
-
             if (parameter.length == 0)
                 return null;
 
@@ -145,14 +147,12 @@ public class ArtistFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<ArtistItem> result){
-
             mArtistAdapter.clear();
 
             if(result.size() > 0)
                 mArtistAdapter.addAll(result);
             else
-                Toast.makeText(getActivity(), "No artist found.", Toast.LENGTH_SHORT).show();
-            //todo: change to snackbar
+                Snackbar.make(mCoordinatorLayoutView, R.string.search_artist_failed, Snackbar.LENGTH_LONG).show();
         }
     }
 }

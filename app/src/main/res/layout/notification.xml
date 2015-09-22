@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/notification_image"
+        android:layout_width="?android:attr/listPreferredItemHeight"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:layout_marginRight="6dp" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/notification_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/notificationText" />
+
+        <TextView
+            android:id="@+id/notification_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/notificationText" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageButton
+                android:id="@+id/notification_previous_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_skip_previous_black_24dp"
+                android:layout_alignParentLeft="true"
+                style="?android:attr/borderlessButtonStyle"/>
+
+            <ImageButton
+                android:id="@+id/notification_pause_resume_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                style="?android:attr/borderlessButtonStyle"/>
+
+            <ImageButton
+                android:id="@+id/notification_next_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_skip_next_black_24dp"
+                android:layout_alignParentRight="true"
+                style="?android:attr/borderlessButtonStyle"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

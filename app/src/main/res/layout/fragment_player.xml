@@ -9,30 +9,35 @@
     <TextView
         android:id="@+id/player_artist_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/player_album_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
+        android:textSize="16sp" />
 
     <ImageView
         android:id="@+id/player_track_artwork"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp" />
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp" />
 
     <TextView
         android:id="@+id/player_track_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
+        android:textSize="16sp" />
 
     <SeekBar
         android:id="@+id/player_seekbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -48,7 +53,6 @@
             android:id="@+id/player_duration_left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -60,18 +64,20 @@
             android:id="@+id/player_action_previous"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_previous" />
+            android:src="@drawable/ic_skip_previous_black_48dp"
+            style="?android:attr/borderlessButtonStyle"/>
 
         <ImageButton
             android:id="@+id/player_action_play_pause"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            style="?android:attr/borderlessButtonStyle"/>
 
         <ImageButton
             android:id="@+id/player_action_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_next" />
+            android:src="@drawable/ic_skip_next_black_48dp"
+            style="?android:attr/borderlessButtonStyle"/>
     </LinearLayout>
-
 </LinearLayout>

@@ -1,16 +1,31 @@
 package se.johanmagnusson.android.spotifystreamer;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
+import android.view.MenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
+import se.johanmagnusson.android.spotifystreamer.service.PlayerService;
 
 public class PlayerActivity extends AppCompatActivity {
+
+    private final String LOG_TAG = PlayerActivity.class.getSimpleName();
+
+    private MenuItem mShareMenuItem;
+    private BroadcastReceiver mBroadcastReceiver;
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,12 +49,84 @@ public class PlayerActivity extends AppCompatActivity {
 
             getSupportFragmentManager().beginTransaction().add(R.id.player_container, playerFragment).commit();
         }
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+
+                if(action.equalsIgnoreCase(PlayerService.ACTION_ON_PREPARING)) {
+                    setShareIntent(createTrackShareIntent((TrackItem) intent.getParcelableExtra(PlayerService.EXTRA_TRACK)));
+                    setEnableShareMenuItem(true);
+                }
+                else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_COMPLETED)) {
+                    setEnableShareMenuItem(false);
+                }
+            }
+        };
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //register for intents
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(PlayerService.ACTION_ON_PREPARING);
+        intentFilter.addAction(PlayerService.ACTION_ON_COMPLETED);
+        LocalBroadcastManager.getInstance(getApplication()).registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
+        // Inflate and add items to the menu
+        getMenuInflater().inflate(R.menu.menu_player, menu);
+        mShareMenuItem = menu.findItem(R.id.action_share);
+        //get shareActionProvider
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(mShareMenuItem);
 
-        //todo: add menu
+        return super.onCreateOptionsMenu(menu);
     }
-}
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivity(settingsIntent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        LocalBroadcastManager.getInstance(getApplication()).unregisterReceiver(mBroadcastReceiver);
+    }
+
+    private Intent createTrackShareIntent(TrackItem track){
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, track.shareUrl);
+        intent.setType("text/plain");
+
+        return intent;
+    }
+
+    private void setShareIntent(Intent shareIntent){
+        if(mShareActionProvider != null)
+            mShareActionProvider.setShareIntent(shareIntent);
+    }
+
+    private void setEnableShareMenuItem(boolean enabled){
+        if(mShareMenuItem != null){
+            mShareMenuItem.setEnabled(enabled);
+            mShareMenuItem.setVisible(enabled);
+        }
+    }
+ }

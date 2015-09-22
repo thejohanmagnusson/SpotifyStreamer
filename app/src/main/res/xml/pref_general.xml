@@ -1,4 +1,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceCategory
+    android:title="@string/pref_header_general"
+    android:key="@string/pref_category_general_key">
 
     <ListPreference
         android:title="@string/pref_country_label"
@@ -9,4 +12,11 @@
         android:negativeButtonText="@null"
         android:positiveButtonText="@null" />
 
+    <CheckBoxPreference
+        android:title="@string/pref_notification_controls_label"
+        android:key="@string/pref_notification_controls_key"
+        android:summaryOn="@string/pref_notification_controls_summary_on"
+        android:summaryOff="@string/pref_notification_controls_summary_off"
+        android:defaultValue="true" />
+    </PreferenceCategory>
 </PreferenceScreen>

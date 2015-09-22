@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +38,8 @@ public class TopTracksFragment extends Fragment{
     private final String LAST_SCROLL_POSITION_KEY = "last_scroll_position";
     static String ARTIST_KEY = "artist";
     private final String TRACKS_KEY = "tracks";
+
+    private View mCoordinatorLayoutView;
 
     private ListView mListView;
     private String mArtist;
@@ -77,6 +79,7 @@ public class TopTracksFragment extends Fragment{
         mTrackAdapter = new TrackAdapter(getActivity(), mTopTracks);
 
         View rootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
+        mCoordinatorLayoutView = rootView.findViewById(R.id.top_tracks_coordinatorlayout);
 
         //set adapter for list and set listener for item click
         mListView = (ListView) rootView.findViewById(R.id.top_tracks_listview);
@@ -188,8 +191,7 @@ public class TopTracksFragment extends Fragment{
             if (result.size() > 0)
                 mTrackAdapter.addAll(result);
             else
-                Toast.makeText(getActivity(), "No top tracks available", Toast.LENGTH_SHORT).show();
-            //todo: change to snackbar
+                Snackbar.make(mCoordinatorLayoutView, R.string.search_top_tracks_failed, Snackbar.LENGTH_LONG).show();
 
         }
     }

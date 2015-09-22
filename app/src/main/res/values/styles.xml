@@ -5,4 +5,11 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <!-- Settings activity theme. -->
+    <style name="SettingsTheme" parent="AppTheme">
+    </style>
+
+    <style name="notificationText" parent="android:TextAppearance.StatusBar.EventContent">
+    </style>
+
 </resources>
