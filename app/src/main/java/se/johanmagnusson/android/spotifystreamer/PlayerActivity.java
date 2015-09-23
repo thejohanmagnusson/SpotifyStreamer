@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
@@ -24,8 +23,22 @@ public class PlayerActivity extends AppCompatActivity {
     private final String LOG_TAG = PlayerActivity.class.getSimpleName();
 
     private MenuItem mShareMenuItem;
-    private BroadcastReceiver mBroadcastReceiver;
     private ShareActionProvider mShareActionProvider;
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if(action.equalsIgnoreCase(PlayerService.ACTION_ON_PREPARING)) {
+                setShareIntent(Utility.createTrackShareIntent((TrackItem) intent.getParcelableExtra(PlayerService.EXTRA_TRACK)));
+                setEnableShareMenuItem(true);
+            }
+            else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_COMPLETED)) {
+                setEnableShareMenuItem(false);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,21 +62,6 @@ public class PlayerActivity extends AppCompatActivity {
 
             getSupportFragmentManager().beginTransaction().add(R.id.player_container, playerFragment).commit();
         }
-
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-
-                if(action.equalsIgnoreCase(PlayerService.ACTION_ON_PREPARING)) {
-                    setShareIntent(createTrackShareIntent((TrackItem) intent.getParcelableExtra(PlayerService.EXTRA_TRACK)));
-                    setEnableShareMenuItem(true);
-                }
-                else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_COMPLETED)) {
-                    setEnableShareMenuItem(false);
-                }
-            }
-        };
     }
 
     @Override
@@ -74,7 +72,7 @@ public class PlayerActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(PlayerService.ACTION_ON_PREPARING);
         intentFilter.addAction(PlayerService.ACTION_ON_COMPLETED);
-        LocalBroadcastManager.getInstance(getApplication()).registerReceiver(mBroadcastReceiver, intentFilter);
+        registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     @Override
@@ -106,16 +104,7 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
-        LocalBroadcastManager.getInstance(getApplication()).unregisterReceiver(mBroadcastReceiver);
-    }
-
-    private Intent createTrackShareIntent(TrackItem track){
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_SEND);
-        intent.putExtra(Intent.EXTRA_TEXT, track.shareUrl);
-        intent.setType("text/plain");
-
-        return intent;
+        unregisterReceiver(mBroadcastReceiver);
     }
 
     private void setShareIntent(Intent shareIntent){

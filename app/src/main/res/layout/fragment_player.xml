@@ -22,8 +22,8 @@
 
     <ImageView
         android:id="@+id/player_track_artwork"
-        android:layout_width="240dp"
-        android:layout_height="240dp"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp" />
 
