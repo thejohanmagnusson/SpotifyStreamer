@@ -22,7 +22,7 @@ import java.util.List;
 
 import se.johanmagnusson.android.spotifystreamer.Models.ArtistItem;
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
-import se.johanmagnusson.android.spotifystreamer.service.PlayerService;
+import se.johanmagnusson.android.spotifystreamer.Service.PlayerService;
 
 
 public class MainActivity extends AppCompatActivity implements ArtistFragment.Callback, TopTracksFragment.Callback {

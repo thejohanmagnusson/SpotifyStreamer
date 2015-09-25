@@ -7,7 +7,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
-import se.johanmagnusson.android.spotifystreamer.service.PlayerService;
+import se.johanmagnusson.android.spotifystreamer.Service.PlayerService;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings.
