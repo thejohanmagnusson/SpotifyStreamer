@@ -7,7 +7,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
-import se.johanmagnusson.android.spotifystreamer.service.PlayerService;
+import se.johanmagnusson.android.spotifystreamer.service.PlayerSService;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings.
@@ -67,7 +67,7 @@ public class SettingsActivity extends PreferenceActivity implements Preference.O
             // For other preferences, set the summary to the value's simple string representation.
             preference.setSummary(stringValue);
             //just one setting for now so no need to check if it´s the right one, just send message
-            sendBroadcast(new Intent().setAction(PlayerService.ACTION_UPDATE_NOTIFICATION));
+            sendBroadcast(new Intent().setAction(PlayerSService.ACTION_UPDATE_NOTIFICATION));
         }
         return true;
     }

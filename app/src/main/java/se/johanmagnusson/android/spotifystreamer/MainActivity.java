@@ -22,7 +22,7 @@ import java.util.List;
 
 import se.johanmagnusson.android.spotifystreamer.Models.ArtistItem;
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
-import se.johanmagnusson.android.spotifystreamer.service.PlayerService;
+import se.johanmagnusson.android.spotifystreamer.service.PlayerSService;
 
 
 public class MainActivity extends AppCompatActivity implements ArtistFragment.Callback, TopTracksFragment.Callback {
@@ -43,12 +43,12 @@ public class MainActivity extends AppCompatActivity implements ArtistFragment.Ca
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if(action.equalsIgnoreCase(PlayerService.ACTION_ON_PREPARING) || action.equalsIgnoreCase(PlayerService.ACTION_IS_PLAYING)) {
+            if(action.equalsIgnoreCase(PlayerSService.ACTION_ON_PREPARING) || action.equalsIgnoreCase(PlayerSService.ACTION_IS_PLAYING)) {
                 setEnableReturnToPlayerMenuItem(true);
-                setShareIntent(Utility.createTrackShareIntent((TrackItem) intent.getParcelableExtra(PlayerService.EXTRA_TRACK)));
+                setShareIntent(Utility.createTrackShareIntent((TrackItem) intent.getParcelableExtra(PlayerSService.EXTRA_TRACK)));
                 setEnableShareMenuItem(true);
             }
-            else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_COMPLETED)) {
+            else if(action.equalsIgnoreCase(PlayerSService.ACTION_ON_COMPLETED)) {
                 setEnableReturnToPlayerMenuItem(false);
                 setEnableShareMenuItem(false);
 
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements ArtistFragment.Ca
                 }
             }
         }
-        else if(action.equalsIgnoreCase(PlayerService.ACTION_SHOW_PLAYER_LARGE_DEVICE)) {
+        else if(action.equalsIgnoreCase(PlayerSService.ACTION_SHOW_PLAYER_LARGE_DEVICE)) {
             showPlayerDialogFragment(null);
         }
     }
@@ -117,15 +117,15 @@ public class MainActivity extends AppCompatActivity implements ArtistFragment.Ca
 
         //register for intents
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(PlayerService.ACTION_ON_PREPARING);
-        intentFilter.addAction(PlayerService.ACTION_ON_COMPLETED);
-        intentFilter.addAction(PlayerService.ACTION_IS_PLAYING);
+        intentFilter.addAction(PlayerSService.ACTION_ON_PREPARING);
+        intentFilter.addAction(PlayerSService.ACTION_ON_COMPLETED);
+        intentFilter.addAction(PlayerSService.ACTION_IS_PLAYING);
         registerReceiver(mBroadcastReceiver, intentFilter);
 
         setEnableReturnToPlayerMenuItem(false);
 
         //send intent to check if service is playing a track
-        sendBroadcast(new Intent().setAction(PlayerService.ACTION_CHECK_IS_PLAYING));
+        sendBroadcast(new Intent().setAction(PlayerSService.ACTION_CHECK_IS_PLAYING));
     }
 
     @Override

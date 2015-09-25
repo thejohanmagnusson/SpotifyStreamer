@@ -44,7 +44,7 @@
                 android:value="se.johanmagnusson.android.spotifystreamer.MainActivity" />
         </activity>
         <service
-            android:name=".service.PlayerService"
+            android:name=".service.PlayerSService"
             android:exported="false"/>
     </application>
 

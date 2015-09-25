@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
-import se.johanmagnusson.android.spotifystreamer.service.PlayerService;
+import se.johanmagnusson.android.spotifystreamer.service.PlayerSService;
 
 public class PlayerDialogFragment extends DialogFragment {
 
@@ -46,29 +46,29 @@ public class PlayerDialogFragment extends DialogFragment {
     private ImageButton mNextBtn;
 
     //service
-    private PlayerService mPlayerService;
+    private PlayerSService mPlayerService;
     private boolean mBound = false;
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if(action.equalsIgnoreCase(PlayerService.ACTION_ON_PREPARING)) {
-                setTrackArtAndText((TrackItem)intent.getParcelableExtra(PlayerService.EXTRA_TRACK));
+            if(action.equalsIgnoreCase(PlayerSService.ACTION_ON_PREPARING)) {
+                setTrackArtAndText((TrackItem)intent.getParcelableExtra(PlayerSService.EXTRA_TRACK));
                 setTrackDurationSeekBar(0);
                 updateTrackProgress(0);
             }
-            else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_PLAY)) {
-                setTrackDurationSeekBar(intent.getIntExtra(PlayerService.EXTRA_DURATION, 0));
+            else if(action.equalsIgnoreCase(PlayerSService.ACTION_ON_PLAY)) {
+                setTrackDurationSeekBar(intent.getIntExtra(PlayerSService.EXTRA_DURATION, 0));
             }
-            else if(action.equalsIgnoreCase(PlayerService.ACTION_PROGRESS)) {
+            else if(action.equalsIgnoreCase(PlayerSService.ACTION_PROGRESS)) {
                 if(!mScrubing)
-                    updateTrackProgress(intent.getIntExtra(PlayerService.EXTRA_PROGRESS, 0));
+                    updateTrackProgress(intent.getIntExtra(PlayerSService.EXTRA_PROGRESS, 0));
             }
-            else if(action.equalsIgnoreCase(PlayerService.ACTION_PAUSE)) {
+            else if(action.equalsIgnoreCase(PlayerSService.ACTION_PAUSE)) {
                 setButtonsPlayingState(false);
             }
-            else if(action.equalsIgnoreCase(PlayerService.ACTION_RESUME)) {
+            else if(action.equalsIgnoreCase(PlayerSService.ACTION_RESUME)) {
                 setButtonsPlayingState(true);
             }
         }
@@ -202,18 +202,18 @@ public class PlayerDialogFragment extends DialogFragment {
         if(!mBound) {
             //register for intents
             IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(PlayerService.ACTION_ON_PREPARING);
-            intentFilter.addAction(PlayerService.ACTION_ON_PLAY);
-            intentFilter.addAction(PlayerService.ACTION_PROGRESS);
-            intentFilter.addAction(PlayerService.ACTION_PAUSE);
-            intentFilter.addAction(PlayerService.ACTION_RESUME);
+            intentFilter.addAction(PlayerSService.ACTION_ON_PREPARING);
+            intentFilter.addAction(PlayerSService.ACTION_ON_PLAY);
+            intentFilter.addAction(PlayerSService.ACTION_PROGRESS);
+            intentFilter.addAction(PlayerSService.ACTION_PAUSE);
+            intentFilter.addAction(PlayerSService.ACTION_RESUME);
 
             if(getResources().getBoolean(R.bool.is_large_device))
-                intentFilter.addAction(PlayerService.ACTION_ON_COMPLETED);
+                intentFilter.addAction(PlayerSService.ACTION_ON_COMPLETED);
 
             getActivity().registerReceiver(mBroadcastReceiver, intentFilter);
 
-            Intent intent = new Intent(getActivity(), PlayerService.class);
+            Intent intent = new Intent(getActivity(), PlayerSService.class);
             getActivity().bindService(intent, mConnection, getActivity().BIND_AUTO_CREATE);
         }
     }
@@ -234,12 +234,12 @@ public class PlayerDialogFragment extends DialogFragment {
         public void onServiceConnected(ComponentName className, IBinder service) {
 
             //get service and set bound
-            PlayerService.PlayerBinder binder = (PlayerService.PlayerBinder) service;
+            PlayerSService.PlayerBinder binder = (PlayerSService.PlayerBinder) service;
             mPlayerService = binder.getService();
             mBound = true;
 
             //use start so service doesn´t stop when binding is released
-            Intent intent = new Intent(getActivity(), PlayerService.class);
+            Intent intent = new Intent(getActivity(), PlayerSService.class);
             getActivity().startService(intent);
 
             //handle auto playing of selected track
