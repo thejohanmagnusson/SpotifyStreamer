@@ -149,8 +149,10 @@ public class ArtistFragment extends Fragment {
         protected void onPostExecute(List<ArtistItem> result){
             mArtistAdapter.clear();
 
-            if(result.size() > 0)
+            if(result.size() > 0){
+                mListView.clearChoices();
                 mArtistAdapter.addAll(result);
+            }
             else
                 Snackbar.make(mCoordinatorLayoutView, R.string.search_artist_failed, Snackbar.LENGTH_LONG).show();
         }

@@ -57,6 +57,8 @@ public class TopTracksActivity extends AppCompatActivity implements TopTracksFra
 
             getSupportFragmentManager().beginTransaction().add(R.id.track_container, topTracksFragment).commit();
         }
+
+        getSupportActionBar().setElevation(0f);
     }
 
     @Override

@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -50,6 +51,13 @@ public class MainActivity extends AppCompatActivity implements ArtistFragment.Ca
             else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_COMPLETED)) {
                 setEnableReturnToPlayerMenuItem(false);
                 setEnableShareMenuItem(false);
+
+                if(getResources().getBoolean(R.bool.is_large_device)){
+                    Fragment fragment = getSupportFragmentManager().findFragmentByTag(PLAYER_DIALOG_FRAGMENT_TAG);
+                    if(fragment != null)
+                        getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+                }
+
             }
         }
     };
@@ -138,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements ArtistFragment.Ca
         mShareMenuItem = menu.findItem(R.id.action_share);
         //get shareActionProvider
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(mShareMenuItem);
+        setEnableShareMenuItem(false);
 
         //set searchable configuration to search view.
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);

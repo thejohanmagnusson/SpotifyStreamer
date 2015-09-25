@@ -71,9 +71,6 @@ public class PlayerDialogFragment extends DialogFragment {
             else if(action.equalsIgnoreCase(PlayerService.ACTION_RESUME)) {
                 setButtonsPlayingState(true);
             }
-            else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_COMPLETED)) {
-                getActivity().finish();
-            }
         }
     };
 
@@ -210,7 +207,10 @@ public class PlayerDialogFragment extends DialogFragment {
             intentFilter.addAction(PlayerService.ACTION_PROGRESS);
             intentFilter.addAction(PlayerService.ACTION_PAUSE);
             intentFilter.addAction(PlayerService.ACTION_RESUME);
-            intentFilter.addAction(PlayerService.ACTION_ON_COMPLETED);
+
+            if(getResources().getBoolean(R.bool.is_large_device))
+                intentFilter.addAction(PlayerService.ACTION_ON_COMPLETED);
+
             getActivity().registerReceiver(mBroadcastReceiver, intentFilter);
 
             Intent intent = new Intent(getActivity(), PlayerService.class);

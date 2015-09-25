@@ -36,6 +36,7 @@ public class PlayerActivity extends AppCompatActivity {
             }
             else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_COMPLETED)) {
                 setEnableShareMenuItem(false);
+                finish();
             }
         }
     };
@@ -62,6 +63,8 @@ public class PlayerActivity extends AppCompatActivity {
 
             getSupportFragmentManager().beginTransaction().add(R.id.player_container, playerFragment).commit();
         }
+
+        getSupportActionBar().setElevation(0f);
     }
 
     @Override

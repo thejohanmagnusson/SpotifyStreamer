@@ -12,4 +12,6 @@
     <style name="notificationText" parent="android:TextAppearance.StatusBar.EventContent">
     </style>
 
+    <style name="ArtistListStyle">
+    </style>
 </resources>
