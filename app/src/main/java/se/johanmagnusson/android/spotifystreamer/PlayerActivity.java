@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
-import se.johanmagnusson.android.spotifystreamer.service.PlayerSService;
+import se.johanmagnusson.android.spotifystreamer.service.PlayerService;
 
 public class PlayerActivity extends AppCompatActivity {
 
@@ -30,11 +30,11 @@ public class PlayerActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if(action.equalsIgnoreCase(PlayerSService.ACTION_ON_PREPARING)) {
-                setShareIntent(Utility.createTrackShareIntent((TrackItem) intent.getParcelableExtra(PlayerSService.EXTRA_TRACK)));
+            if(action.equalsIgnoreCase(PlayerService.ACTION_ON_PREPARING)) {
+                setShareIntent(Utility.createTrackShareIntent((TrackItem) intent.getParcelableExtra(PlayerService.EXTRA_TRACK)));
                 setEnableShareMenuItem(true);
             }
-            else if(action.equalsIgnoreCase(PlayerSService.ACTION_ON_COMPLETED)) {
+            else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_COMPLETED)) {
                 setEnableShareMenuItem(false);
                 finish();
             }
@@ -73,8 +73,8 @@ public class PlayerActivity extends AppCompatActivity {
 
         //register for intents
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(PlayerSService.ACTION_ON_PREPARING);
-        intentFilter.addAction(PlayerSService.ACTION_ON_COMPLETED);
+        intentFilter.addAction(PlayerService.ACTION_ON_PREPARING);
+        intentFilter.addAction(PlayerService.ACTION_ON_COMPLETED);
         registerReceiver(mBroadcastReceiver, intentFilter);
     }
 

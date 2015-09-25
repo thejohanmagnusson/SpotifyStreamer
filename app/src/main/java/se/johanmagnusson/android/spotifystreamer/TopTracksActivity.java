@@ -15,7 +15,7 @@ import java.util.List;
 
 import se.johanmagnusson.android.spotifystreamer.Models.ArtistItem;
 import se.johanmagnusson.android.spotifystreamer.Models.TrackItem;
-import se.johanmagnusson.android.spotifystreamer.service.PlayerSService;
+import se.johanmagnusson.android.spotifystreamer.service.PlayerService;
 
 
 public class TopTracksActivity extends AppCompatActivity implements TopTracksFragment.Callback{
@@ -29,10 +29,10 @@ public class TopTracksActivity extends AppCompatActivity implements TopTracksFra
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if(action.equalsIgnoreCase(PlayerSService.ACTION_ON_PREPARING) || action.equalsIgnoreCase(PlayerSService.ACTION_IS_PLAYING)) {
+            if(action.equalsIgnoreCase(PlayerService.ACTION_ON_PREPARING) || action.equalsIgnoreCase(PlayerService.ACTION_IS_PLAYING)) {
                 setEnableReturnToPlayerMenuItem(true);
             }
-            else if(action.equalsIgnoreCase(PlayerSService.ACTION_ON_COMPLETED)) {
+            else if(action.equalsIgnoreCase(PlayerService.ACTION_ON_COMPLETED)) {
                 setEnableReturnToPlayerMenuItem(false);
             }
         }
@@ -67,15 +67,15 @@ public class TopTracksActivity extends AppCompatActivity implements TopTracksFra
 
         //register for intents
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(PlayerSService.ACTION_ON_PREPARING);
-        intentFilter.addAction(PlayerSService.ACTION_ON_COMPLETED);
-        intentFilter.addAction(PlayerSService.ACTION_IS_PLAYING);
+        intentFilter.addAction(PlayerService.ACTION_ON_PREPARING);
+        intentFilter.addAction(PlayerService.ACTION_ON_COMPLETED);
+        intentFilter.addAction(PlayerService.ACTION_IS_PLAYING);
         registerReceiver(mBroadcastReceiver, intentFilter);
 
         setEnableReturnToPlayerMenuItem(false);
 
         //send intent to check if service is playing a track
-        sendBroadcast(new Intent().setAction(PlayerSService.ACTION_CHECK_IS_PLAYING));
+        sendBroadcast(new Intent().setAction(PlayerService.ACTION_CHECK_IS_PLAYING));
     }
 
     @Override
