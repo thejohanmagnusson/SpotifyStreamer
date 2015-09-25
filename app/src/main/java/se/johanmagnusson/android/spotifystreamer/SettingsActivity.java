@@ -1,10 +1,13 @@
 package se.johanmagnusson.android.spotifystreamer;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+
+import se.johanmagnusson.android.spotifystreamer.service.PlayerService;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings.
@@ -25,6 +28,7 @@ public class SettingsActivity extends PreferenceActivity implements Preference.O
         // For all preferences, attach an OnPreferenceChangeListener so the UI summary can be
         // updated when the preference changes.
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_country_key)));
+        bindBooleanPreferenceSummaryToValue(findPreference(getString(R.string.pref_notification_controls_key)));
     }
 
     /**
@@ -39,6 +43,11 @@ public class SettingsActivity extends PreferenceActivity implements Preference.O
         // Trigger the listener immediately with the preference's
         // current value.
         onPreferenceChange(preference, PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));
+    }
+
+    private void bindBooleanPreferenceSummaryToValue(Preference preference) {
+        preference.setOnPreferenceChangeListener(this);
+        onPreferenceChange(preference, PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getBoolean(preference.getKey(), true));
     }
 
     @Override
@@ -57,6 +66,8 @@ public class SettingsActivity extends PreferenceActivity implements Preference.O
         else {
             // For other preferences, set the summary to the value's simple string representation.
             preference.setSummary(stringValue);
+            //just one setting for now so no need to check if it´s the right one, just send message
+            sendBroadcast(new Intent().setAction(PlayerService.ACTION_UPDATE_NOTIFICATION));
         }
         return true;
     }
