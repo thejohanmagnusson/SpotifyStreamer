@@ -151,9 +151,6 @@ public class TopTracksFragment extends Fragment{
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String countryCode = prefs.getString(getString(R.string.pref_country_key), getString(R.string.pref_country_default));
 
-            if(countryCode.equalsIgnoreCase(""))
-                countryCode = getString(R.string.pref_country_default);
-
             final Map<String, Object> options = new HashMap<String, Object>();
             options.put(COUNTRY, countryCode);
 

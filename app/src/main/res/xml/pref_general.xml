@@ -6,7 +6,7 @@
     <ListPreference
         android:title="@string/pref_country_label"
         android:key="@string/pref_country_key"
-        android:defaultValue="0"
+        android:defaultValue="SE"
         android:entries="@array/pref_country_list_options"
         android:entryValues="@array/pref_country_list_values"
         android:negativeButtonText="@null"
