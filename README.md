@@ -18,4 +18,4 @@ Enumerated in the app's build.gradle, we require:
 
 ## Building and Running
 
-Import the SpotifyStreamer folder into Android Studio as an existing project and select 'Run > Run app'.
+Import the SpotifyStreamer folder into Android Studio as an existing project and select `Run > Run app`.
